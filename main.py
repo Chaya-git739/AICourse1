@@ -5,11 +5,16 @@ from __future__ import annotations
 import json
 import os
 import re
+from pathlib import Path
 from urllib import error, parse, request
 from typing import Optional, Tuple
 
 import gradio as gr
 
+
+BASE_DIR = Path(__file__).resolve().parent
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 7860
 
 DANGEROUS_MESSAGE = "Error: dangerous command not allowed"
 UNSUPPORTED_MESSAGE = "Error: unsupported request"
@@ -112,12 +117,13 @@ GIT_DANGEROUS_PATTERNS = (
 )
 
 
-def load_dotenv(dotenv_path: str = ".env") -> None:
+def load_dotenv(dotenv_path: str | Path = BASE_DIR / ".env") -> None:
     """Load key=value pairs from a local .env file into environment variables."""
-    if not os.path.exists(dotenv_path):
+    path = Path(dotenv_path)
+    if not path.exists():
         return
 
-    with open(dotenv_path, "r", encoding="utf-8") as env_file:
+    with path.open("r", encoding="utf-8") as env_file:
         for raw_line in env_file:
             line = raw_line.strip()
             if not line or line.startswith("#") or "=" not in line:
@@ -1089,9 +1095,9 @@ def build_interface() -> gr.Interface:
 
 def main() -> None:
     """Start the localhost Gradio app."""
-    load_dotenv()
+    load_dotenv(BASE_DIR / ".env")
     app = build_interface()
-    app.launch(server_name="127.0.0.1", server_port=7860)
+    app.launch(server_name=DEFAULT_HOST, server_port=DEFAULT_PORT)
 
 
 if __name__ == "__main__":
